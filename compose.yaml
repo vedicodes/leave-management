@@ -1,0 +1,25 @@
+﻿services:
+  gateway:
+    image: gateway
+    build:
+      context: .
+      dockerfile: src/Gateway/Dockerfile
+
+  leave.api:
+    image: leave.api
+    build:
+      context: .
+      dockerfile: src/Leave/Leave.Api/Dockerfile
+
+  notification.api:
+    image: notification.api
+    build:
+      context: .
+      dockerfile: src/Notification/Notification.Api/Dockerfile
+
+  user.api:
+    image: user.api
+    build:
+      context: .
+      dockerfile: src/User/User.Api/Dockerfile
+
