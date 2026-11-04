@@ -1,9 +1,7 @@
-﻿namespace User.Application.Dtos;
+﻿namespace User.Application.DTOs;
 
-using Domain.Entities;
-
-public class TeamDto
+public class TeamDTO
 {
-    public User Manager { get; set; }
-    public ICollection<User> Employees { get; set; }
+    public required EmployeeDTO Manager { get; set; }
+    public required IReadOnlyCollection<EmployeeDTO> Associates { get; set; }
 }

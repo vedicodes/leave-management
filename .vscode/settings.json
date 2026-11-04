@@ -1,0 +1,4 @@
+{
+    "dotnet.defaultSolution": "LeaveManagement.sln",
+    "editor.formatOnSave": true
+}
