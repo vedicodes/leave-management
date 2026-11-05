@@ -7,7 +7,7 @@ namespace User.Application.Services;
 public class EmployeeService : IEmployeeService
 {
     private readonly IEmployeeRepository _employeeRepository;
-    
+
     public EmployeeService(IEmployeeRepository employeeRepository)
     {
         _employeeRepository = employeeRepository;
@@ -16,7 +16,7 @@ public class EmployeeService : IEmployeeService
     public async Task<TeamDTO?> GetTeamByManagerIdAsync(Guid managerId)
     {
         var manager = await _employeeRepository.GetManagerByIdAsync(managerId);
-        if (manager == null)  return null;
+        if (manager == null) return null;
 
         return new TeamDTO
         {
@@ -24,7 +24,7 @@ public class EmployeeService : IEmployeeService
             Associates = manager.Associates.Select(associate => new EmployeeDTO(associate.Id, associate.Firstname, associate.Lastname, associate.Email, associate.Role, associate.ManagerId)).ToList().AsReadOnly()
         };
     }
-    
+
     public async Task<Guid> CreateEmployeeAsync(CreateEmployeeDTO user)
     {
         var employee = Employee.Create(user.Firstname, user.Lastname, user.Email, user.Password, user.Role, user.ManagerId);
@@ -33,21 +33,26 @@ public class EmployeeService : IEmployeeService
         return employee.Id;
     }
 
-    public async Task<bool> UpdateEmployeeNameAsync(UpdateEmployeeDTO user)
+    public async Task<bool> UpdateEmployeeNameAsync(UpdateEmployeeNameDTO user)
     {
         var employee = await _employeeRepository.GetByIdAsync(user.Id);
         if (employee == null) return false;
-        
+
         employee.ChangeName(user.Firstname, user.Lastname);
         return await _employeeRepository.SaveAsync(employee);
     }
 
-    public async Task<bool> UpdateEmployeePasswordAsync(UpdateEmployeeDTO user)
+    public async Task<bool> UpdateEmployeePasswordAsync(UpdateEmployeePasswordDTO user)
     {
-        throw new NotImplementedException();
+        var employee = await _employeeRepository.GetByIdAsync(user.Id);
+        if (employee == null) return false;
+
+        // Add Password Hasher Logic
+        employee.ChangePasswordHash(user.Password);
+        return await _employeeRepository.SaveAsync(employee);
     }
 
-    public async Task<bool> UpdateEmployeeManagerAsync(UpdateEmployeeDTO user)
+    public async Task<bool> UpdateEmployeeManagerAsync(UpdateEmployeeManagerDTO user)
     {
         throw new NotImplementedException();
     }
