@@ -7,16 +7,19 @@ namespace User.Application.Services;
 public class EmployeeService : IEmployeeService
 {
     private readonly IEmployeeRepository _employeeRepository;
+    private readonly IPasswordHasher _passwordHasher;
 
-    public EmployeeService(IEmployeeRepository employeeRepository)
+    public EmployeeService(IEmployeeRepository employeeRepository, IPasswordHasher passwordHasher)
     {
         _employeeRepository = employeeRepository;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<TeamDTO?> GetTeamByManagerIdAsync(Guid managerId)
     {
         var manager = await _employeeRepository.GetManagerByIdAsync(managerId);
-        if (manager == null) return null;
+        if (manager == null)
+            throw new ArgumentException("Manager not found");
 
         return new TeamDTO
         {
@@ -36,7 +39,8 @@ public class EmployeeService : IEmployeeService
     public async Task<bool> UpdateEmployeeNameAsync(UpdateEmployeeNameDTO user)
     {
         var employee = await _employeeRepository.GetByIdAsync(user.Id);
-        if (employee == null) return false;
+        if (employee == null)
+            throw new ArgumentException("Employee not found");
 
         employee.ChangeName(user.Firstname, user.Lastname);
         return await _employeeRepository.SaveAsync(employee);
@@ -45,20 +49,30 @@ public class EmployeeService : IEmployeeService
     public async Task<bool> UpdateEmployeePasswordAsync(UpdateEmployeePasswordDTO user)
     {
         var employee = await _employeeRepository.GetByIdAsync(user.Id);
-        if (employee == null) return false;
+        if (employee == null)
+            throw new ArgumentException("Employee not found");
 
-        // Add Password Hasher Logic
-        employee.ChangePasswordHash(user.Password);
+        var passwordHash = _passwordHasher.HashPassword(user.Password);
+        employee.ChangePasswordHash(passwordHash);
         return await _employeeRepository.SaveAsync(employee);
     }
 
     public async Task<bool> UpdateEmployeeManagerAsync(UpdateEmployeeManagerDTO user)
     {
-        throw new NotImplementedException();
+        var employee = await _employeeRepository.GetByIdAsync(user.Id);
+        if (employee == null)
+            throw new ArgumentException("Employee not found");
+        
+        employee.ChangeManager(user.ManagerId);
+        return await _employeeRepository.SaveAsync(employee);
     }
 
     public async Task<bool> DeleteEmployeeAsync(Guid id)
     {
-        throw new NotImplementedException();
+        var employee = await _employeeRepository.GetByIdAsync(id);
+        if (employee == null)
+            throw new ArgumentException("Employee not found");
+        
+        return await _employeeRepository.DeleteAsync(employee);
     }
 }
